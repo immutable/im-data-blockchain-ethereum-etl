@@ -72,11 +72,15 @@ class ExportBlocksJob(BaseJob):
 
     def _export_batch(self, block_number_batch):
         blocks_rpc = list(generate_get_block_by_number_json_rpc(block_number_batch, self.export_transactions))
+        print(f"Blocks rpc in _export_batch {blocks_rpc}")
         response = self.batch_web3_provider.make_batch_request(json.dumps(blocks_rpc))
+        print(f"response in _export_batch {response}")
         results = rpc_response_batch_to_results(response)
+        print(f"results in _export_batch {results}")
         blocks = [self.block_mapper.json_dict_to_block(result) for result in results]
-
+        print(f"results in blocks {blocks}")
         for block in blocks:
+            print(f"The block object is {block.chain_id}")
             self._export_block(block)
 
     def _export_block(self, block):

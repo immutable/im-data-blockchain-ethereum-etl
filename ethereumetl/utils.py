@@ -67,11 +67,14 @@ def validate_range(range_start_incl, range_end_incl):
 
 
 def rpc_response_batch_to_results(response):
+    print(f"I am inside rpc_response_batch_to_results - response is:{response}")
     for response_item in response:
         yield rpc_response_to_result(response_item)
 
 
 def rpc_response_to_result(response):
+    print(f"I am inside rpc_response_to_result - response is:{response}")
+    print(response)
     result = response.get('result')
     if result is None:
         error_message = 'result is None in response {}.'.format(response)
