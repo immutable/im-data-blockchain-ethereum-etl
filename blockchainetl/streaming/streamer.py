@@ -100,10 +100,10 @@ class Streamer:
             return self.chain_id_cache
         
         try:
-            w3 = Web3(Web3.HTTPProvider('https://zkevm-rpc.sandbox.imtbl.com/'))
+            w3 = Web3(Web3.HTTPProvider('https://rpc.testnet.immutable.com/'))
             self.chain_id_cache = w3.eth.chain_id
             self.chain_id_cache_timestamp = datetime.utcnow()
-            logging.info(f"Re-fetching chain_id from the API {self.chain_id_cache}")
+            logging.info(f"Re-fetching chain_id from the API chain_id={self.chain_id_cache}")
             return self.chain_id_cache
         except Exception as e:
             logging.error(f"Error fetching chain_id from the API: {str(e)}")
