@@ -29,6 +29,7 @@ from blockchainetl.streaming.streamer_adapter_stub import StreamerAdapterStub
 from blockchainetl.file_utils import smart_open
 from web3 import Web3
 from datetime import datetime, timedelta
+from retry import retry
 
 
 class Streamer:
@@ -65,6 +66,11 @@ class Streamer:
             logging.info(f"{last_chain_id} != {self.chain_id}")
             write_last_synced_block(self.last_synced_block_file, 0, self.chain_id)
 
+    @retry(tries=10, delay=10)
+    def _fetch_chain_id(self):
+        w3 = Web3(Web3.HTTPProvider('https://zkevm-rpc.sandbox.imtbl.com/'))
+        return w3.eth.chain_id
+
     def stream(self):
         try:
             if self.pid_file is not None:
@@ -97,11 +103,11 @@ class Streamer:
 
     def get_chain_id_from_api(self):
         if self.chain_id_cache is not None and datetime.utcnow() - self.chain_id_cache_timestamp < timedelta(minutes=30):
+            logging.info(f"Feching chain_id from cache - {self.chain_id_cache}. Last cache timestamp = {self.chain_id_cache_timestamp} and current utc time is {datetime.utcnow()}")
             return self.chain_id_cache
-        
+            
         try:
-            w3 = Web3(Web3.HTTPProvider('https://rpc.testnet.immutable.com/'))
-            self.chain_id_cache = w3.eth.chain_id
+            self.chain_id_cache = self._fetch_chain_id()
             self.chain_id_cache_timestamp = datetime.utcnow()
             logging.info(f"Re-fetching chain_id from the API chain_id={self.chain_id_cache}")
             return self.chain_id_cache
